@@ -178,7 +178,7 @@ https://github.com/JavierML1/Examen_bioinformatica.git
 ## 7. Acaba el documento con el comando sessionInfo()
 
 ```{r}
-sessioninfo()
+sessionInfo()
 ```
 
 
