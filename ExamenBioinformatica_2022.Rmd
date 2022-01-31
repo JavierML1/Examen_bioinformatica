@@ -173,7 +173,7 @@ El gen sobreexpresado mas significativo es Rbp1, ya que es el gen sobreexpresado
 
 ## 6. Sube el examen a github y escribe a continuacion tu url aqui
 
-
+https://github.com/JavierML1/Examen_bioinformatica.git
 
 ## 7. Acaba el documento con el comando sessionInfo()
 
