@@ -1,0 +1,189 @@
+---
+title: "ExamenBioinformatica_2022"
+author: "Javier Martínez Lanciego"
+date: "31/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Examen Bioinformática
+
+## 1. Comandos de Linux. Tengo un fichero llamado genes.txt con 3 columnas: Nombre_de_gen, cromosoma y posición. Separados por tabulados. ¿Que comando utilizarias para saber?:
+
+a) ¿Cuantas palabras hay en el fichero?
+
+cat genes.txt | wc -w
+
+b) ¿Como cambiarias todos los tabulados por guiones?
+
+cat genes.txt | sed 's/\t/-/g'
+
+c) ¿Como cambiarias solo la primera aparicion?
+
+cat genes.txt | sed 's/\t/-/'
+
+d) ¿Como buscarias todos los genes excepto el gen llamado DSTYK?
+
+cat genes.txt | grep -v DSTYK
+
+## 2. Preguntas básicas:
+
+a. (0.5 puntos) ¿Cuántas columnas y cuántos registros tiene este dataset?
+
+```{r}
+tiempo <- nycflights13::weather
+
+dim(tiempo)
+
+```
+
+La dataset tiene 26115 registros y 15 columnas
+
+b. (0.5 puntos) ¿Cuántos “origin” diferentes existen y para cada uno de ellos cuántos registros hay?
+
+```{r}
+table(tiempo$origin)
+
+```
+
+Hay 3 origin distintos que son: EWR (8703 registros), JFK (8706 registros) y LGA (8706 registros)
+
+c. (0.5 puntos) En LGA ¿cuales fueron la mediana del wind_speed y media de pressure pressure? 
+
+```{r}
+LGA <- tiempo[tiempo$origin == "LGA" , ]
+
+median(LGA$wind_speed, na.rm = T)
+mean(LGA$pressure, na.rm = T)
+```
+
+La mediana de wind_speed es 10.35702 mph y la media de pressure es 1017.678 millibars
+
+d. (0.5 puntos) Después de eliminar los NA de la columna wind_gust, calcula para cada mes la media de wind_speed y wind_gust, y el número de casos.
+
+```{r}
+library(tidyverse)
+library(lubridate)
+
+tiempo_sin_NA <- tiempo[complete.cases(tiempo$wind_gust),]
+meses <- tiempo_sin_NA %>%
+  group_by(month) %>%
+  summarise(media_wind_speed = mean(wind_speed),
+            media_wind_gust = mean(wind_gust),
+            n_casos = n()
+  )
+
+meses
+```
+
+
+## 3. Intenta hacer este plot
+
+```{r}
+LGA <- tiempo[tiempo$origin == "LGA" , ]
+EWR <- tiempo[tiempo$origin == "EWR" , ]
+JFK <- tiempo[tiempo$origin == "JFK" , ]
+
+par(mfrow = c(1,3))
+boxplot(EWR$temp ~ EWR$month, main = "EWR", ylab = "ºC", xlab = "Months", col =  "red")
+boxplot(JFK$temp ~ JFK$month, main = "JFK", ylab = "ºC", xlab = "Months", col =  "green")
+boxplot(LGA$temp ~ LGA$month, main = "LGA", ylab = "ºC", xlab = "Months", col =  "blue")
+```
+
+
+```{r}
+plot_meteo <- function(data , columna1, columna2, titulo, unidades, color)
+{
+  dat <- data.frame(data)
+  x <- dat[ , columna1]
+  y <- dat[ , columna2]
+  boxplot(x ~ y , type = "l", main = titulo , xlab = "Hours", ylab = unidades, col = color)
+  media <- c(mean(EWR$humid, na.rm = T), mean(JFK$humid, na.rm = T), mean(LGA$humid, na.rm = T))
+  media_total <- (mean(media))
+  return(media)
+  print(paste0("La media total es " , media_total))
+}
+par(mfrow = c(1,3))
+plot_meteo(EWR, columna1 = "humid", columna2 ="month", titulo = "Humedad", unidades = "Relative humidity", color = "red")
+plot_meteo(JFK, columna1 = "humid", columna2 ="month", titulo = "Humedad", unidades = "Relative humidity", color = "green")
+plot_meteo(LGA, columna1 = "humid", columna2 ="month", titulo = "Humedad", unidades = "Relative humidity", color = "blue")
+```
+
+
+## 4. ) El día de tu cumpleaños:
+
+a. Qué correlación tuvieron la temperatura y humedad en cada uno de los origin? Plotealo mediante puntos con ggplot. 
+
+
+```{r}
+cumple <- tiempo[tiempo$month == 3 & tiempo$day == 13 , ]
+cumple_JFK <- tiempo[tiempo$origin == "JFK" & tiempo$month == 3 & tiempo$day == 13 , ]
+cumple_EWR <- tiempo[tiempo$origin == "EWR" & tiempo$month == 3 & tiempo$day == 13 , ]
+cumple_LGA <- tiempo[tiempo$origin == "LGA" & tiempo$month == 3 & tiempo$day == 13 , ]
+
+
+
+cor(cumple_EWR$temp , cumple_EWR$humid)
+
+cor(cumple_JFK$temp , cumple_JFK$humid)
+
+cor(cumple_LGA$temp , cumple_LGA$humid)
+```
+
+
+En los tres casos la temperatura y la humedad tienen una correlaon negativo bastante fuerte, con un valor de -0.8. Eso quiere decir que al aumentar la temperatura disminuye la humedad.
+
+```{r}
+ggplot(cumple) + 
+  geom_point(mapping = aes(x = temp , y = humid, col = origin, size = origin)) +
+  ggtitle("Temperatura vs Humedad") + 
+  labs(x = "Temperatura", y = "Humedad")
+```
+
+En el plot se observa lo mismo, como en los tres casos al aumentar la temperatura disminuye la humedad.
+
+
+b. Si comparas la temperatura en los origins JFK y LGA ¿son estadisticamente diferentes? ¿Qué p-valor consigues? Plotea los boxplots
+
+```{r}
+par(mfrow = c(1,1))
+cumple_JFK_LGA <- cumple <- tiempo[tiempo$origin != "EWR" & tiempo$month == 3 & tiempo$day == 13 , ]
+
+t.test(cumple_JFK_LGA$temp ~ cumple$origin)
+
+boxplot(cumple_JFK_LGA$temp ~ cumple_JFK_LGA$origin, xlab = "Origin", ylab = "Temp")
+```
+
+Si son estadisticamente diferentes ya que se consigue un p-valor de 0.6592.
+
+
+## 5. Observa la siguiente imagen
+
+a. ¿Cual es el punto con FC (Fold Change) más grande en valores absolutos?
+
+El punto con FC mas grande en valores absoluto es el punto morado que está mas a la izquierda de la gráfica con un logfc que se aproxima mucho a -10.
+
+b. ¿Qué gen sobreexpresado es el más significativo?
+
+El gen sobreexpresado mas significativo es Rbp1, ya que es el gen sobreexpresado que tiene menor p-valor.
+
+
+## 6. Sube el examen a github y escribe a continuacion tu url aqui
+
+
+
+## 7. Acaba el documento con el comando sessionInfo()
+
+```{r}
+sessioninfo()
+```
+
+
+
+
+
+
+
