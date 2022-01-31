@@ -19,11 +19,11 @@ cat genes.txt | wc -w
 
 b) ¿Como cambiarias todos los tabulados por guiones?
 
-cat genes.txt | sed 's/\t/-/g'
+cat genes.txt | sed $'s/\t/-/g'$
 
 c) ¿Como cambiarias solo la primera aparicion?
 
-cat genes.txt | sed 's/\t/-/'
+cat genes.txt | sed $'s/\t/-/'$
 
 d) ¿Como buscarias todos los genes excepto el gen llamado DSTYK?
 
@@ -100,7 +100,7 @@ plot_meteo <- function(data , columna1, columna2, titulo, unidades, color)
   dat <- data.frame(data)
   x <- dat[ , columna1]
   y <- dat[ , columna2]
-  boxplot(x ~ y , type = "l", main = titulo , xlab = "Hours", ylab = unidades, col = color)
+  boxplot(x ~ y, main = titulo , xlab = "Hours", ylab = unidades, col = color)
   media <- c(mean(EWR$humid, na.rm = T), mean(JFK$humid, na.rm = T), mean(LGA$humid, na.rm = T))
   media_total <- (mean(media))
   return(media)

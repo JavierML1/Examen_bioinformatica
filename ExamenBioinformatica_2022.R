@@ -96,3 +96,6 @@ t.test(cumple_JFK_LGA$temp ~ cumple$origin)
 boxplot(cumple_JFK_LGA$temp ~ cumple_JFK_LGA$origin, xlab = "Origin", ylab = "Temp")
 
     
+
+
+sessionInfo()
